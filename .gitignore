@@ -132,3 +132,4 @@ dmypy.json
 .pdapikey
 alerts.csv
 .vscode
+*.csv

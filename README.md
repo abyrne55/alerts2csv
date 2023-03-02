@@ -7,7 +7,7 @@ Before you begin, you'll need:
   * RHEL users: run `sudo dnf install python39 python39-pip` 
   * Fedora users: run `sudo dnf install python3 python3-pip` (although they're probably already installed) 
 * a PagerDuty User/API token/key ([instructions](https://support.pagerduty.com/docs/api-access-keys#section-generate-a-user-token-rest-api-key))
-* the (PDPYRAS)[https://github.com/PagerDuty/pdpyras] pip package
+* the [PDPYRAS](https://github.com/PagerDuty/pdpyras) pip package
   * run `pip3 install pdpyras` or `pip3.9 install pdpyras`
 
 Then just clone this repo, `cd` into it, drop your PagerDuty API key into a text file called `.pdapikey`, and run `chmod +x ./alerts2csv.py`.
@@ -45,6 +45,15 @@ The following command would download all acknowledged alerts that occurred betwe
 ```
 Finally, the following command would download all ack'd alerts from the past month for any PagerDuty service connected to clusters under the OCM org. ID "ABCD12345wxyz" to "wxyz.csv"
 ```bash
-ocm get /api/accounts_mgmt/v1/subscriptions -p search="organization_id like 'ABCD12345wxyz'" | jq -r '.items[] | select(.managed==true and .status=="Active") | .console_url' | cut -d. -f3- | ./alerts2csv.py --output-path=wxyz.csv -
+ocm get /api/accounts_mgmt/v1/subscriptions -p search="organization_id like 'ABCD12345wxyz'" | jq -r '.items[] | select(.managed==true and .status=="Active") | .console_url' | cut -d. -f3- | grep -v null | ./alerts2csv.py --output-path=wxyz.csv -
 # Note: the hypen at the end is important!
+```
+
+The output CSV file will look something like this:
+```csv
+IncidentNum,Timestamp,ClusterName,AlertName,Urgency,URL
+1328294,2023-02-06T14:35:13Z,api-prod,ClusterOperatorDown CRITICAL,high,https://mycompany.pagerduty.com/incidents/Q3HUSOTCXP419G
+1326825,2023-02-03T16:28:33Z,dev-stage,ClusterOperatorDown CRITICAL,high,https://mycompany.pagerduty.com/incidents/Q1L2XTB060TCO1
+1329840,2023-02-07T15:39:31Z,mycluster,KubeNodeUnschedulable CRITICAL,high,https://mycompany.pagerduty.com/incidents/QXADBLFHB5G52Z
+1340527,2023-02-20T11:18:37Z,foobar,UpgradeNodeDrainFailed CRITICAL,high,https://mycompany.pagerduty.com/incidents/Q3XZEY2I9U9GU5
 ```
